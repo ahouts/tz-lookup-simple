@@ -18,6 +18,8 @@ use std::fs::File;
 
 let geo_json = File::open("./my/local/geojson_data.json").unwrap();
 let tzl = TzLookup::new(geo_json).unwrap();
+
+assert_eq!(Some("America/Los_Angeles"), tzl.lookup(34.075822, -118.522885));
 ```
 
 However, tz-lookup-simple also provides an inline version of the timezone data for
