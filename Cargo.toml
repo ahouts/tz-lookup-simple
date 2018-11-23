@@ -1,0 +1,29 @@
+[package]
+name = "tz-lookup-simple"
+version = "0.1.0"
+authors = ["ahouts <ahouts4@gmail.com>"]
+edition = "2018"
+
+[features]
+inline_tzdata_complete = []
+
+[dependencies]
+xz2 = "0.1.6"
+geojson = "0.13.0"
+geo = "0.10.2"
+geo-types = { version = "0.2.0", features = ["serde"]}
+serde = "1.0.80"
+serde_derive = "1.0.80"
+serde_json = "1.0.33"
+bincode = "1.0.1"
+num-traits = "0.2.6"
+
+[dev-dependencies]
+reqwest = "0.9.5"
+zip = "0.5.0"
+progress-streams = "1.0.0"
+termion = "1.5.1"
+
+[[example]]
+name = "update_tzdata"
+path = "src/update_tzdata.rs"
