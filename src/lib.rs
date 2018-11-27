@@ -66,7 +66,7 @@ impl TzLookup {
     }
 
     /// look up a location
-    pub fn lookup(&self, lon: f64, lat: f64) -> Option<&str> {
+    pub fn lookup(&self, lat: f64, lon: f64) -> Option<&str> {
         for tz in self.tzs.iter() {
             match tz.1 {
                 PolyType::Polygon(ref p) => {
