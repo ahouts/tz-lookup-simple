@@ -66,7 +66,7 @@ impl TzLookup {
     }
 
     /// look up a location
-    pub fn lookup(&self, lat: f64, lon: f64) -> Option<&str> {
+    pub fn lookup(&self, lon: f64, lat: f64) -> Option<&str> {
         for tz in self.tzs.iter() {
             match tz.1 {
                 PolyType::Polygon(ref p) => {
@@ -90,10 +90,10 @@ impl TzLookup {
     /// load TzLookup from inline tzdata
     pub fn from_inline_complete() -> Self {
         use bincode::deserialize_from;
-        use xz2::read::XzDecoder;
+        use brotli_decompressor::Decompressor;
 
-        const X: &'static [u8] = include_bytes!("tzdata_complete.bin.xz");
-        let i = XzDecoder::new(X);
+        const X: &'static [u8] = include_bytes!("tzdata_complete.bin.brotli");
+        let i = Decompressor::new(X, 4096);
         deserialize_from(i).unwrap()
     }
 }
@@ -129,11 +129,6 @@ mod tests {
     #[cfg(feature = "inline_tzdata_complete")]
     mod inline_tests {
         use crate::TzLookup;
-
-        #[test]
-        fn inline_works() {
-            TzLookup::from_inline_complete();
-        }
 
         #[test]
         fn get_coords_test() {

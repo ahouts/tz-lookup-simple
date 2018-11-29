@@ -27,7 +27,7 @@ ease of use.
 
 To enable it, add the following line to your Cargo.toml
 
-**NOTE: Enabling this feature will increase your binary size by ~18MB**
+**NOTE: Enabling this feature will increase your binary size by ~40MB**
 
 ```toml
 tz-lookup-simple = { version = "*", features = ["inline_tzdata_complete"] }

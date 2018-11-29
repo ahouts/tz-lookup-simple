@@ -5,7 +5,7 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, AtomicBool, Ordering};
 use tz_lookup_simple::TzLookup;
 use std::fs::File;
-use xz2::write::XzEncoder;
+use brotli2::write::BrotliEncoder;
 use bincode::serialize_into;
 use reqwest::get;
 use zip::read::ZipArchive;
@@ -85,8 +85,8 @@ fn main() {
     done.store(true, Ordering::SeqCst);
     println!("\rdone parsing json{}", clear::AfterCursor);
 
-    let out = File::create("./src/tzdata_complete.bin.xz").unwrap();
-    let out = XzEncoder::new(out, 9);
+    let out = File::create("./src/tzdata_complete.bin.brotli").unwrap();
+    let out = BrotliEncoder::new(out, 9);
 
     let (done, out_writer) = write_with_progress(out, "writing output");
 
