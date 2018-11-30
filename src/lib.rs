@@ -66,17 +66,17 @@ impl TzLookup {
     }
 
     /// look up a location
-    pub fn lookup(&self, lon: f64, lat: f64) -> Option<&str> {
+    pub fn lookup(&self, lat: f64, lon: f64) -> Option<&str> {
         for tz in self.tzs.iter() {
             match tz.1 {
                 PolyType::Polygon(ref p) => {
-                    if p.contains(&Point::new(lat, lon)) {
+                    if p.contains(&Point::new(lon, lat)) {
                         return Some(tz.0.as_str());
                     }
                 },
                 PolyType::MultiPoly(ref mp) => {
                     for p in mp.0.iter() {
-                        if p.contains(&Point::new(lat, lon)) {
+                        if p.contains(&Point::new(lon, lat)) {
                             return Some(tz.0.as_str());
                         }
                     }
