@@ -1,6 +1,6 @@
 [package]
 name = "tz-lookup-simple"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["ahouts <ahouts4@gmail.com>"]
 edition = "2018"
 
