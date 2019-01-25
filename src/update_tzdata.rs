@@ -5,7 +5,7 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, AtomicBool, Ordering};
 use tz_lookup_simple::TzLookup;
 use std::fs::File;
-use brotli2::write::BrotliEncoder;
+use brotli::CompressorWriter;
 use bincode::serialize_into;
 use reqwest::get;
 use zip::read::ZipArchive;
@@ -60,7 +60,7 @@ fn write_with_progress(writer: impl Write, msg: &'static str) -> (Arc<AtomicBool
 }
 
 fn main() {
-    const TIMEZONE_GEOJSON_URL: &'static str = "https://github.com/evansiroky/timezone-boundary-builder/releases/download/2018g/timezones-with-oceans.geojson.zip";
+    const TIMEZONE_GEOJSON_URL: &'static str = "https://github.com/evansiroky/timezone-boundary-builder/releases/download/2018i/timezones-with-oceans.geojson.zip";
     const GEOJSON_PATH: &'static str = "dist/combined-with-oceans.json";
     println!("starting request...");
     let req = get(TIMEZONE_GEOJSON_URL).unwrap();
@@ -86,7 +86,7 @@ fn main() {
     println!("\rdone parsing json{}", clear::AfterCursor);
 
     let out = File::create("./src/tzdata_complete.bin.brotli").unwrap();
-    let out = BrotliEncoder::new(out, 9);
+    let out = CompressorWriter::new(out, 4096, 11, 21);
 
     let (done, out_writer) = write_with_progress(out, "writing output");
 
