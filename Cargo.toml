@@ -1,6 +1,6 @@
 [package]
 name = "tz-lookup-simple"
-version = "0.3.3"
+version = "0.3.4"
 authors = ["ahouts <ahouts4@gmail.com>"]
 edition = "2018"
 
@@ -9,9 +9,9 @@ inline_tzdata_complete = []
 
 [dependencies]
 brotli-decompressor = "2.1.2"
-geojson = "0.14.0"
-geo = "0.11.0"
-geo-types = { version = "0.3.0", features = ["serde"]}
+geojson = "0.15.0"
+geo = "0.12.0"
+geo-types = { version = "0.4.0", features = ["serde"]}
 serde = "1.0.80"
 serde_derive = "1.0.80"
 serde_json = "1.0.33"
@@ -19,7 +19,7 @@ bincode = "1.0.1"
 num-traits = "0.2.6"
 
 [dev-dependencies]
-brotli = "1.0.92"
+brotli = "3.3"
 reqwest = "0.9.5"
 zip = "0.5.0"
 progress-streams = "1.0.0"
