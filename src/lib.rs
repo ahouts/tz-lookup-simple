@@ -1,15 +1,17 @@
 #[macro_use]
 extern crate serde_derive;
 
-use std::io::Read;
-use geojson::{GeoJson, conversion::TryInto};
-use geo_types::{Geometry, Point};
 use geo::prelude::*;
+use geo_types::{Geometry, Point};
+use geojson::GeoJson;
+use std::convert::TryInto;
 use std::error::Error;
+use std::io::Read;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum PolyType<T>
-    where T: num_traits::Num + num_traits::cast::NumCast + Copy + std::cmp::PartialOrd
+where
+    T: num_traits::Num + num_traits::cast::NumCast + Copy + std::cmp::PartialOrd,
 {
     Polygon(geo_types::Polygon<T>),
     MultiPoly(geo_types::MultiPolygon<T>),
@@ -24,45 +26,42 @@ impl TzLookup {
     /// build a TzLookup from a geo_json reader
     pub fn new(geo_json: impl Read) -> Result<Self, BuildTzLookupError> {
         let gj: GeoJson = serde_json::from_reader(geo_json)?;
-        let tzs: Result<Vec<(String, PolyType<f64>)>, BuildTzLookupError> = if let GeoJson::FeatureCollection(col) = gj {
-            col.features.iter()
-                .map(|f| {
-                    let tzid = if let Some(ref props) = f.properties {
-                        match props.get("tzid") {
-                            None => Err(BuildTzLookupError::FeaturePropTzidMissing),
-                            Some(v) => {
-                                match v.as_str() {
+        let tzs: Result<Vec<(String, PolyType<f64>)>, BuildTzLookupError> =
+            if let GeoJson::FeatureCollection(col) = gj {
+                col.features
+                    .iter()
+                    .map(|f| {
+                        let tzid = if let Some(ref props) = f.properties {
+                            match props.get("tzid") {
+                                None => Err(BuildTzLookupError::FeaturePropTzidMissing),
+                                Some(v) => match v.as_str() {
                                     None => Err(BuildTzLookupError::FeaturePropTzidNotString),
-                                    Some(s) => {
-                                        Ok(String::from(s))
-                                    },
-                                }
-                            },
-                        }
-                    } else {
-                        Err(BuildTzLookupError::FeatureHasNoProperties)
-                    }?;
-                    let geo: Geometry<f64> = if let Some(ref geometry) = f.geometry {
-                        match geometry.value.clone().try_into() {
-                            Ok(g) => Ok(g),
-                            Err(e) => Err(BuildTzLookupError::InvalidGeometry(e)),
-                        }
-                    } else {
-                        return Err(BuildTzLookupError::InvalidGeoJson);
-                    }?;
-                    let geo = match geo {
-                        Geometry::MultiPolygon(p) => Ok(PolyType::MultiPoly(p)),
-                        Geometry::Polygon(p) => Ok(PolyType::Polygon(p)),
-                        _ => Err(BuildTzLookupError::NonPolygonType),
-                    }?;
-                    Ok((tzid, geo))
-                }).collect()
-        } else {
-            return Err(BuildTzLookupError::InvalidGeoJson);
-        };
-        Ok(TzLookup{
-            tzs: tzs?,
-        })
+                                    Some(s) => Ok(String::from(s)),
+                                },
+                            }
+                        } else {
+                            Err(BuildTzLookupError::FeatureHasNoProperties)
+                        }?;
+                        let geo: Geometry<f64> = if let Some(ref geometry) = f.geometry {
+                            match geometry.value.clone().try_into() {
+                                Ok(g) => Ok(g),
+                                Err(e) => Err(BuildTzLookupError::InvalidGeometry(e)),
+                            }
+                        } else {
+                            return Err(BuildTzLookupError::InvalidGeoJson);
+                        }?;
+                        let geo = match geo {
+                            Geometry::MultiPolygon(p) => Ok(PolyType::MultiPoly(p)),
+                            Geometry::Polygon(p) => Ok(PolyType::Polygon(p)),
+                            _ => Err(BuildTzLookupError::NonPolygonType),
+                        }?;
+                        Ok((tzid, geo))
+                    })
+                    .collect()
+            } else {
+                return Err(BuildTzLookupError::InvalidGeoJson);
+            };
+        Ok(TzLookup { tzs: tzs? })
     }
 
     /// look up a location
@@ -73,7 +72,7 @@ impl TzLookup {
                     if p.contains(&Point::new(lon, lat)) {
                         return Some(tz.0.as_str());
                     }
-                },
+                }
                 PolyType::MultiPoly(ref mp) => {
                     for p in mp.0.iter() {
                         if p.contains(&Point::new(lon, lat)) {
@@ -133,7 +132,10 @@ mod tests {
         #[test]
         fn get_coords_test() {
             let tz_lookup = TzLookup::from_inline_complete();
-            assert_eq!(Some("America/Los_Angeles"), tz_lookup.lookup(34.075822, -118.522885));
+            assert_eq!(
+                Some("America/Los_Angeles"),
+                tz_lookup.lookup(34.075822, -118.522885)
+            );
         }
     }
 }

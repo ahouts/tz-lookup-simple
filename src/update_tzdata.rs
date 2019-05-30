@@ -1,19 +1,18 @@
-
 extern crate tz_lookup_simple;
 
-use std::sync::Arc;
-use std::sync::atomic::{AtomicUsize, AtomicBool, Ordering};
-use tz_lookup_simple::TzLookup;
-use std::fs::File;
-use brotli::CompressorWriter;
 use bincode::serialize_into;
-use reqwest::get;
-use zip::read::ZipArchive;
+use brotli::CompressorWriter;
 use progress_streams::{ProgressReader, ProgressWriter};
+use reqwest::get;
+use std::fs::File;
+use std::io::{Cursor, Read, Write};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
-use std::io::{Read, Write, Cursor};
 use termion::clear;
+use tz_lookup_simple::TzLookup;
+use zip::read::ZipArchive;
 
 fn read_with_progress(reader: impl Read, msg: &'static str) -> (Arc<AtomicBool>, impl Read) {
     let total = Arc::new(AtomicUsize::new(0));
@@ -29,7 +28,12 @@ fn read_with_progress(reader: impl Read, msg: &'static str) -> (Arc<AtomicBool>,
         let done = done.clone();
         thread::spawn(move || {
             while !done.load(Ordering::SeqCst) {
-                print!("\r{}: {} KiB{}", msg, total.load(Ordering::SeqCst) / 1024, clear::AfterCursor);
+                print!(
+                    "\r{}: {} KiB{}",
+                    msg,
+                    total.load(Ordering::SeqCst) / 1024,
+                    clear::AfterCursor
+                );
                 thread::sleep(Duration::from_millis(16));
             }
         });
@@ -51,7 +55,12 @@ fn write_with_progress(writer: impl Write, msg: &'static str) -> (Arc<AtomicBool
         let done = done.clone();
         thread::spawn(move || {
             while !done.load(Ordering::SeqCst) {
-                print!("\r{}: {} KiB{}", msg, total.load(Ordering::SeqCst) / 1024, clear::AfterCursor);
+                print!(
+                    "\r{}: {} KiB{}",
+                    msg,
+                    total.load(Ordering::SeqCst) / 1024,
+                    clear::AfterCursor
+                );
                 thread::sleep(Duration::from_millis(16));
             }
         });
@@ -60,7 +69,7 @@ fn write_with_progress(writer: impl Write, msg: &'static str) -> (Arc<AtomicBool
 }
 
 fn main() {
-    const TIMEZONE_GEOJSON_URL: &'static str = "https://github.com/evansiroky/timezone-boundary-builder/releases/download/2018i/timezones-with-oceans.geojson.zip";
+    const TIMEZONE_GEOJSON_URL: &'static str = "https://github.com/evansiroky/timezone-boundary-builder/releases/download/2019a/timezones-with-oceans.geojson.zip";
     const GEOJSON_PATH: &'static str = "dist/combined-with-oceans.json";
     println!("starting request...");
     let req = get(TIMEZONE_GEOJSON_URL).unwrap();
@@ -79,8 +88,7 @@ fn main() {
 
     let (done, parse_read) = read_with_progress(geo_json, "parsing json");
 
-    let tzl = TzLookup::new(parse_read)
-        .expect("error building TzLookup from geojson data");
+    let tzl = TzLookup::new(parse_read).expect("error building TzLookup from geojson data");
 
     done.store(true, Ordering::SeqCst);
     println!("\rdone parsing json{}", clear::AfterCursor);
